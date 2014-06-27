@@ -17,9 +17,10 @@ public class StudentTableModel extends AbstractTableModel {
 	private String[] colNames = {"Name", "Grade", "Gender", "Address", 
 			"Phone #", "Parent Email", "Subject", "Session/Weeks", 
 			"Availability", "Request Volunteer", "Notes"};
-	//one sample data record - "John Smith"
+	//SAMPLE data
 	private Object[][] data = {{"John Smith", "8", "M", "1 Main St.", "12345", 
-		"blah@m.com", "Math", "Spring", "MTWThF", "", ""}};
+		"blah@m.com", "Math", "Spring", "MTWThF", "", ""}, {"Water Melon", "6", "F", "2 Beaufort Ave.", "98765", 
+			"lolXD@google.com", "Both", "Spring", "MF", "", "Afraid of books"}};
 	
 	@Override
 	public int getColumnCount() {
