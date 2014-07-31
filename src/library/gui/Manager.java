@@ -14,6 +14,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
+import library.gui.panels.HomePanel;
+import library.gui.panels.PairingPanel;
+import library.gui.panels.StudentPanel;
+import library.gui.panels.VolunteerPanel;
+
 /**
  * @author Roland
  *

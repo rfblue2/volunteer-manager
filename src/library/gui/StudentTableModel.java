@@ -3,48 +3,57 @@
  */
 package library.gui;
 
+import java.util.ArrayList;
+
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
+
+import library.database.DbManager;
+import library.database.Student;
 
 /**
  * @author Roland
  *
  */
-public class StudentTableModel extends AbstractTableModel {
-	
-	//TODO instantiate a database handler to query database to init table
+public class StudentTableModel extends AbstractTableModel implements TableModelListener {
 	
 	//temporary, filler column names; later retrieve from database
-	private String[] colNames = {"Name", "Grade", "Gender", "Address", 
-			"Phone #", "Parent Email", "Subject", "Session/Weeks", 
-			"Availability", "Request Volunteer", "Notes"};
-	//SAMPLE data
-	private Object[][] data = {{"John Smith", "8", "M", "1 Main St.", "12345", 
-		"blah@m.com", "Math", "Spring", "MTWThF", "", ""}, {"Water Melon", "6", "F", "2 Beaufort Ave.", "98765", 
-			"lolXD@google.com", "Both", "Spring", "MF", "", "Afraid of books"}};
+	private ArrayList<String> colNames;
+
+	private ArrayList<Student> data;
+	
+	public StudentTableModel()	{
+		data = DbManager.getStudents();
+		colNames = Student.fields;
+		addTableModelListener(this);
+	}
 	
 	@Override
 	public int getColumnCount() {
-		return colNames.length;
+		return colNames.size();
 	}
 
 	@Override
 	public int getRowCount() {
-		return data.length;
+		return data.size();
 	}
 
 	@Override
 	public Object getValueAt(int r, int c) {
-		return data[r][c];
+		return data.get(r).getAttribute(c);
 	}
 
 	@Override
 	public Class<?> getColumnClass(int c) {
-		return getValueAt(0, c).getClass();
+		//return getValueAt(0, c).getClass();
+		return Object.class;//I guess unless you pass obj, you can't mix...
 	}
 
 	@Override
 	public String getColumnName(int col) {
-		return colNames[col];
+		return colNames.get(col);
 	}
 
 	@Override
@@ -57,8 +66,39 @@ public class StudentTableModel extends AbstractTableModel {
 
 	@Override
 	public void setValueAt(Object val, int r, int c) {
-		data[r][c] = val;
+		data.get(r).setAttribute(c, val);
 		fireTableCellUpdated(r, c);
+	}
+	
+	/**
+	 * Adds student to table and database
+	 * @param s
+	 */
+	public void addStudent(Student s)	{
+		DbManager.addStudent(s);
+		data.add(s);
+		fireTableRowsInserted(getRowCount() - 1, getRowCount() - 1);
+	}
+	
+	/**
+	 * Removes student (row) from table and database
+	 * @param rowNum
+	 */
+	public void removeStudent(int rowNum)	{
+		DbManager.removeStudent(rowNum + 1);//add 1 because table is actually 1 row behind excel sheet
+		data.remove(rowNum);
+		fireTableRowsDeleted(rowNum, rowNum);
+	}
+
+	@Override
+	public void tableChanged(TableModelEvent e) {
+		int r = e.getFirstRow();
+		int c = e.getColumn();
+		if(e.getType() == TableModelEvent.UPDATE)	{
+			TableModel model = (TableModel)e.getSource();
+			Object data = model.getValueAt(r, c);
+			DbManager.editStudentAttribute(r, c, data);
+		}
 	}
 	
 }
