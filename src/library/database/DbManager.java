@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 
 import org.apache.poi.ss.usermodel.Cell;
@@ -22,6 +23,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 public class DbManager {
 	
 	private static final String dataFile = "data1.xlsx";
+	public static final String INFO = "Info";
+	public static final String STUDENTS = "Students";
+	public static final String VOLUNTEERS = "Volunteers";
 	private static FileInputStream fin;
 	private static FileOutputStream fout;
 	private static XSSFWorkbook workbook;
@@ -75,6 +79,48 @@ public class DbManager {
 	}
 	
 	/**
+	 * Sets the current session
+	 * @param d1 start
+	 * @param d2 end
+	 */
+	public static void setSession(Date d1, Date d2)	{
+		openInputStream();
+		XSSFSheet sheet = workbook.getSheet(INFO);
+		Iterator<Row> rowIterator = sheet.iterator();
+		Iterator<Cell> cellIterator = rowIterator.next().cellIterator();
+		cellIterator.next();//skip the cell labeled "session"
+		cellIterator.next().setCellValue(d1);
+		cellIterator.next().setCellValue(d2);
+		
+		closeInputStream();
+
+		openOutputStream();
+		try {
+			workbook.write(fout);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		closeOutputStream();
+	}
+	
+	/**
+	 * Gets the current session
+	 * @return session as Date array
+	 */
+	public static Date[] getSession()	{
+		openInputStream();
+		Date[] s = new Date[2];
+		XSSFSheet sheet = workbook.getSheet(INFO);
+		Iterator<Row> rowIterator = sheet.iterator();
+		Iterator<Cell> cellIterator = rowIterator.next().cellIterator();
+		cellIterator.next();//skip the cell labeled "session"
+		s[0] = cellIterator.next().getDateCellValue();
+		s[1] = cellIterator.next().getDateCellValue();
+		closeInputStream();
+		return s;
+	}
+	
+	/**
 	 * Returns fields as arraylist of strings given sheet name
 	 * @param sheetName the name of the excel sheet
 	 * @return fields
@@ -98,7 +144,7 @@ public class DbManager {
 	public static ArrayList<Student> getStudents()	{
 		openInputStream();//always open before reading to file!
 		ArrayList<Student> students = new ArrayList<Student>();
-		XSSFSheet sheet = workbook.getSheet("Students");
+		XSSFSheet sheet = workbook.getSheet(DbManager.STUDENTS);
 		
 		//iterate through rows of students
 		Iterator<Row> rowIterator = sheet.iterator();
@@ -131,7 +177,7 @@ public class DbManager {
 	public static ArrayList<Volunteer> getVolunteers()	{
 		openInputStream();//always open before reading to file!
 		ArrayList<Volunteer> volunteers = new ArrayList<Volunteer>();
-		XSSFSheet sheet = workbook.getSheet("Volunteers");
+		XSSFSheet sheet = workbook.getSheet(DbManager.VOLUNTEERS);
 		
 		//iterate through rows of volunteers
 		Iterator<Row> rowIterator = sheet.iterator();
@@ -164,7 +210,7 @@ public class DbManager {
 	 */
 	public static void addStudent(Student s)	{
 		openInputStream();
-		XSSFSheet sheet = workbook.getSheet("Students");
+		XSSFSheet sheet = workbook.getSheet(DbManager.STUDENTS);
 		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		for(int i = 0; i < Student.fields.size(); i++)	{
 			Cell cell = row.createCell(i);
@@ -187,15 +233,17 @@ public class DbManager {
 	}
 
 	/**
-	 * Removes student given row number
+	 * Removes either student or volunteer given row number
 	 * @param row number
+	 * @param obj student or volunteer
 	 */
-	public static void removeStudent(int rowNum)	{
+	public static void remove(int rowNum, String obj)	{
 		openInputStream();
-		XSSFSheet sheet = workbook.getSheet("Students");
+		XSSFSheet sheet = workbook.getSheet(obj);
 		if(rowNum != sheet.getLastRowNum())	{//only shift rows up if they exist
 			sheet.removeRow(sheet.getRow(rowNum));//get rid of entry
-			sheet.shiftRows(rowNum, sheet.getLastRowNum(), 1);//shift other entries up
+			sheet.shiftRows(rowNum + 1, sheet.getLastRowNum(), -1);//shift other entries up
+			//note that tablemodel actually updates ids every time table is changed!
 		}
 		else
 			sheet.removeRow(sheet.getRow(rowNum));//get rid of entry
@@ -210,14 +258,15 @@ public class DbManager {
 	}
 	
 	/**
-	 * Edits cell in student sheet at row r and column c
+	 * Edits cell in specified sheet at row r and column c
 	 * @param r the row
 	 * @param c the column
 	 * @param val the value
+	 * @param obj the sheet name
 	 */
-	public static void editStudentAttribute(int r, int c, Object val)	{
+	public static void editAttribute(int r, int c, Object val, String obj)	{
 		openInputStream();
-		XSSFSheet sheet = workbook.getSheet("Students");
+		XSSFSheet sheet = workbook.getSheet(obj);
 		Row row = sheet.getRow(r + 1);
 		Cell cell = row.getCell(c);
 		if(val instanceof String)
@@ -242,7 +291,7 @@ public class DbManager {
 	 */
 	public static void addVolunteer(Volunteer v)	{
 		openInputStream();
-		XSSFSheet sheet = workbook.getSheet("Volunteers");
+		XSSFSheet sheet = workbook.getSheet(DbManager.VOLUNTEERS);
 		Row row = sheet.createRow(sheet.getLastRowNum() + 1);
 		for(int i = 0; i < Volunteer.fields.size(); i++)	{
 			Cell cell = row.createCell(i);
@@ -254,56 +303,6 @@ public class DbManager {
 			else if(obj instanceof Integer)
 				cell.setCellValue((int)obj);
 		}
-		closeInputStream();
-		openOutputStream();
-		try {
-			workbook.write(fout);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		closeOutputStream();
-	}
-
-	/**
-	 * Removes volunteer given row number
-	 * @param row number
-	 */
-	public static void removeVolunteer(int rowNum)	{
-		openInputStream();
-		XSSFSheet sheet = workbook.getSheet("Volunteers");
-		if(rowNum != sheet.getLastRowNum())	{//only shift rows up if they exist
-			sheet.removeRow(sheet.getRow(rowNum));//get rid of entry
-			sheet.shiftRows(rowNum, sheet.getLastRowNum(), 1);//shift other entries up
-		}
-		else
-			sheet.removeRow(sheet.getRow(rowNum));//get rid of entry
-		closeInputStream();
-		openOutputStream();
-		try {
-			workbook.write(fout);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		closeOutputStream();
-	}
-	
-	/**
-	 * Edits cell in volunteer sheet at row r and column c
-	 * @param r the row
-	 * @param c the column
-	 * @param val the value
-	 */
-	public static void editVolunteerAttribute(int r, int c, Object val)	{
-		openInputStream();
-		XSSFSheet sheet = workbook.getSheet("Volunteers");
-		Row row = sheet.getRow(r + 1);
-		Cell cell = row.getCell(c);
-		if(val instanceof String)
-			cell.setCellValue((String)val);
-		else if(val instanceof Long)
-			cell.setCellValue((long)val);
-		else if(val instanceof Integer)
-			cell.setCellValue((int)val);
 		closeInputStream();
 		openOutputStream();
 		try {

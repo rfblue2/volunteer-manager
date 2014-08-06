@@ -85,9 +85,15 @@ public class StudentTableModel extends AbstractTableModel implements TableModelL
 	 * @param rowNum
 	 */
 	public void removeStudent(int rowNum)	{
-		DbManager.removeStudent(rowNum + 1);//add 1 because table is actually 1 row behind excel sheet
-		data.remove(rowNum);
-		fireTableRowsDeleted(rowNum, rowNum);
+		DbManager.remove(rowNum, DbManager.STUDENTS);
+		data.remove(rowNum - 1);
+		fireTableRowsDeleted(rowNum - 1, rowNum - 1);
+		//shift ID
+		for(int i = rowNum - 1; i < data.size(); i++)	{
+			data.get(i).setAttribute(0, Integer.parseInt(data.get(i).getAttribute(0).toString()) - 1);
+			fireTableCellUpdated(i, 0);
+		}
+		
 	}
 
 	@Override
@@ -97,7 +103,7 @@ public class StudentTableModel extends AbstractTableModel implements TableModelL
 		if(e.getType() == TableModelEvent.UPDATE)	{
 			TableModel model = (TableModel)e.getSource();
 			Object data = model.getValueAt(r, c);
-			DbManager.editStudentAttribute(r, c, data);
+			DbManager.editAttribute(r, c, data, DbManager.STUDENTS);
 		}
 	}
 	

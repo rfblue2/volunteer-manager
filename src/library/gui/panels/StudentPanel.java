@@ -8,9 +8,11 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.regex.PatternSyntaxException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -18,8 +20,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.TableRowSorter;
 
+import library.database.DbManager;
 import library.database.Student;
 import library.gui.StudentTableModel;
 
@@ -31,7 +38,10 @@ public class StudentPanel extends JPanel implements ActionListener {
 	private static JTable studentTable;
 	private static JButton add;
 	private static JButton remove;
-	private static JButton search;
+	private static JLabel filterLabel;
+	private static JTextField filterText;
+	private static JComboBox<String> filterFields;
+	private TableRowSorter<StudentTableModel> sorter;
 	
 	/**
 	 * 
@@ -42,7 +52,10 @@ public class StudentPanel extends JPanel implements ActionListener {
 		
 		//instantiate table of students
 		//table uses StudentTableModel
-		studentTable = new JTable(new StudentTableModel());
+		StudentTableModel stm = new StudentTableModel();
+		sorter = new TableRowSorter<StudentTableModel>(stm);
+		studentTable = new JTable(stm);
+		studentTable.setRowSorter(sorter);
 		JScrollPane tableScroll = new JScrollPane(studentTable);
 		studentTable.setFillsViewportHeight(true);
 		
@@ -52,11 +65,25 @@ public class StudentPanel extends JPanel implements ActionListener {
 		add.addActionListener(this);
 		remove = new JButton("Remove");
 		remove.addActionListener(this);
-		search = new JButton("Search");
-		search.addActionListener(this);
+		filterLabel = new JLabel("Filter: ");
+		filterFields = new JComboBox<String>(DbManager.getFields(DbManager.STUDENTS).toArray(new String[DbManager.getFields(DbManager.STUDENTS).size()]));
+		filterFields.addActionListener(this);
+		filterText = new JTextField(15);
+		filterText.getDocument().addDocumentListener(new DocumentListener()	{
+			@Override
+			public void changedUpdate(DocumentEvent e) {newFilter();}
+			@Override
+			public void insertUpdate(DocumentEvent e) {newFilter();}
+			@Override
+			public void removeUpdate(DocumentEvent e) {newFilter();}
+			
+		});
+		
 		buttonPanel.add(add);
 		buttonPanel.add(remove);
-		buttonPanel.add(search);
+		buttonPanel.add(filterLabel);
+		buttonPanel.add(filterFields);
+		buttonPanel.add(filterText);
 		
 		//add components to studentPanel
 		add(tableScroll);
@@ -74,15 +101,26 @@ public class StudentPanel extends JPanel implements ActionListener {
 			if(JOptionPane.showConfirmDialog(this, "Are you sure you want to remove students?") == JOptionPane.YES_OPTION)	{
 				StudentTableModel stm = (StudentTableModel) studentTable.getModel();
 				//delete selected rows, but backwards in order to prevent changing indices from affecting removal
-				int[] ids = studentTable.getSelectedRows();
-				for(int id = ids[ids.length - 1]; id >= ids[0]; id--)	{
-					stm.removeStudent(id);
+				int[] rows = studentTable.getSelectedRows();
+				for(int r = rows[rows.length - 1]; r >= rows[0]; r--)	{
+					int newR = studentTable.convertRowIndexToModel(r);
+					stm.removeStudent((Integer.parseInt(studentTable.getModel().getValueAt(newR, 0).toString())));//gets the ID
 				}
 			}
 		}
-		else if(e.getSource() == search)	{
-			System.out.println("search student");
+	}
+
+	/**
+	 * Creates new filter for input text and chosen field
+	 */
+	private void newFilter()	{
+		RowFilter<StudentTableModel, Object> rf = null;
+		try	{
+			rf = RowFilter.regexFilter(filterText.getText(),  filterFields.getSelectedIndex());
+		} catch (PatternSyntaxException e)	{
+			return;
 		}
+		sorter.setRowFilter(rf);
 	}
 	
 	private static class AddStudentDialog extends JDialog	{
@@ -121,6 +159,8 @@ public class StudentPanel extends JPanel implements ActionListener {
 				panels[i].setAlignmentY(Component.BOTTOM_ALIGNMENT);
 				content.add(panels[i]);//add panel into the container
 			}
+			fields[0].setEditable(false);//do not allow editing ID
+			fields[0].setText(""+(DbManager.getStudents().size() + 1));
 			//init buttons
 			buttons = new JPanel();
 			ok = new JButton("Ok");

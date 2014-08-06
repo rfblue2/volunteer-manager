@@ -8,9 +8,11 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
+import java.util.regex.PatternSyntaxException;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -18,8 +20,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.RowFilter;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.TableRowSorter;
 
+import library.database.DbManager;
 import library.database.Volunteer;
 import library.gui.VolunteerTableModel;
 
@@ -31,7 +38,11 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 	private static JTable volunteerTable;
 	private static JButton add;
 	private static JButton remove;
-	private static JButton search;
+	private static JLabel filterLabel;
+	private static JTextField filterText;
+	private static JComboBox<String> filterFields;
+	private static JButton genLetters;
+	private TableRowSorter<VolunteerTableModel> sorter;
 	
 	public VolunteerPanel()	{
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -39,7 +50,10 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 		
 		//instantiate table of volunteers
 		//table uses VolunteerTableModel
-		volunteerTable = new JTable(new VolunteerTableModel());
+		VolunteerTableModel vtm = new VolunteerTableModel();
+		sorter = new TableRowSorter<VolunteerTableModel>(vtm);
+		volunteerTable = new JTable(vtm);
+		volunteerTable.setRowSorter(sorter);
 		JScrollPane tableScroll = new JScrollPane(volunteerTable);
 		volunteerTable.setFillsViewportHeight(true);
 		
@@ -49,11 +63,28 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 		add.addActionListener(this);
 		remove = new JButton("Remove");
 		remove.addActionListener(this);
-		search = new JButton("Search");
-		search.addActionListener(this);
+		filterLabel = new JLabel("Filter: ");
+		filterFields = new JComboBox<String>(DbManager.getFields(DbManager.VOLUNTEERS).toArray(new String[DbManager.getFields(DbManager.VOLUNTEERS).size()]));
+		filterFields.addActionListener(this);
+		filterText = new JTextField(15);
+		filterText.getDocument().addDocumentListener(new DocumentListener()	{
+			@Override
+			public void changedUpdate(DocumentEvent e) {newFilter();}
+			@Override
+			public void insertUpdate(DocumentEvent e) {newFilter();}
+			@Override
+			public void removeUpdate(DocumentEvent e) {newFilter();}
+			
+		});
+		genLetters = new JButton("Generate Letters");
+		genLetters.addActionListener(this);
+		
 		buttonPanel.add(add);
 		buttonPanel.add(remove);
-		buttonPanel.add(search);
+		buttonPanel.add(filterLabel);
+		buttonPanel.add(filterFields);
+		buttonPanel.add(filterText);
+		buttonPanel.add(genLetters);
 		
 		//add components to volunteerPanel
 		add(tableScroll);
@@ -63,23 +94,35 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == add)	{
-			System.out.println("add volunteer");
 			AddVolunteerDialog asd = new AddVolunteerDialog();
 		}
 		else if(e.getSource() == remove)	{
-			System.out.println("remove volunteer");
 			if(JOptionPane.showConfirmDialog(this, "Are you sure you want to remove Volunteers?") == JOptionPane.YES_OPTION)	{
 				VolunteerTableModel vtm = (VolunteerTableModel) volunteerTable.getModel();
 				//delete selected rows, but backwards in order to prevent changing indices from affecting removal
-				int[] ids = volunteerTable.getSelectedRows();
-				for(int id = ids[ids.length - 1]; id >= ids[0]; id--)	{
-					vtm.removeVolunteer(id);
+				int[] rows = volunteerTable.getSelectedRows();
+				for(int r = rows[rows.length - 1]; r >= rows[0]; r--)	{
+					int newR = volunteerTable.convertRowIndexToModel(r);
+					vtm.removeVolunteer((Integer.parseInt(volunteerTable.getModel().getValueAt(newR, 0).toString())));//gets the ID
 				}
 			}
 		}
-		else if(e.getSource() == search)	{
-			System.out.println("search volunteer");
+		else if(e.getSource() == genLetters)	{
+			
 		}
+	}
+	
+	/**
+	 * Creates new filter for input text and chosen field
+	 */
+	private void newFilter()	{
+		RowFilter<VolunteerTableModel, Object> rf = null;
+		try	{
+			rf = RowFilter.regexFilter(filterText.getText(),  filterFields.getSelectedIndex());
+		} catch (PatternSyntaxException e)	{
+			return;
+		}
+		sorter.setRowFilter(rf);
 	}
 	
 	private static class AddVolunteerDialog extends JDialog	{
@@ -118,6 +161,8 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 				panels[i].setAlignmentY(Component.BOTTOM_ALIGNMENT);
 				content.add(panels[i]);//add panel into the container
 			}
+			fields[0].setEditable(false);//do not allow editing ID
+			fields[0].setText(""+(DbManager.getVolunteers().size() + 1));
 			//init buttons
 			buttons = new JPanel();
 			ok = new JButton("Ok");

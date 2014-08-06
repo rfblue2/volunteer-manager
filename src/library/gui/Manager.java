@@ -4,8 +4,14 @@
 package library.gui;
 
 import java.awt.Container;
+import java.awt.Font;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
+import javax.swing.BoxLayout;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -21,12 +27,17 @@ import library.gui.panels.VolunteerPanel;
  */
 public class Manager {
 	
+	public static final double version = 0.1;
+	
 	//Panels
-	private static JTabbedPane masterPanel;
+	private static JPanel masterPanel;
+	private static JTabbedPane tabPanel;
 	private static HomePanel pHome;
 	private static StudentPanel pStudents;
 	private static VolunteerPanel pVolunteers;
 	private static PairingPanel pPairing;
+	
+	private static Font arial16;
 	
 	/**
 	 * Creates MasterPanel, which houses tabs
@@ -34,17 +45,27 @@ public class Manager {
 	 */
 	private Container createContentPane() {
 		//initialize panels
-		masterPanel = new JTabbedPane();
+		masterPanel = new JPanel();
+		masterPanel.setLayout(new BoxLayout(masterPanel, BoxLayout.Y_AXIS));
+		tabPanel = new JTabbedPane();
 		pHome = new HomePanel();
 		pStudents = new StudentPanel();
 		pVolunteers = new VolunteerPanel();
 		pPairing = new PairingPanel();
 		
+		arial16 = new Font("Arial", Font.PLAIN, 16);
+		
 		//add them to tabs
-		masterPanel.addTab("Home", pHome);
-		masterPanel.addTab("Students", pStudents);
-		masterPanel.addTab("Volunteers", pVolunteers);
-		masterPanel.addTab("Pairing", pPairing);
+		tabPanel.addTab("Home", pHome);
+		tabPanel.addTab("Students", pStudents);
+		tabPanel.addTab("Volunteers", pVolunteers);
+		tabPanel.addTab("Pairing", pPairing);
+		tabPanel.setFont(arial16);
+		
+		masterPanel.add(tabPanel);
+		//add date
+		JLabel time = new JLabel(new SimpleDateFormat("MMMM dd, yyyy").format(Calendar.getInstance().getTime()));
+		masterPanel.add(time);//the date and time
 		
 		return masterPanel;
 	}

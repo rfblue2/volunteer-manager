@@ -1,9 +1,2 @@
-DbManager dbMngr = new DbManager();
-
-ArrayList<String> vfields = dbMngr.getFields("Students");
-
-ArrayList<Student> students = dbMngr.getStudents();
-for(Student st : students)	{
-	System.out.println(st);
-}
-
+DbManager.setSession(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis() + 100000000L));
+//DbManager.getSession();
