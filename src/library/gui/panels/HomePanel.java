@@ -31,6 +31,7 @@ public class HomePanel extends JPanel implements ActionListener {
 	private static JLabel session;
 	private static JButton setSession;
 	private static JLabel info;
+	private static SimpleDateFormat dateDispFormat;
 	
 	public HomePanel()	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -45,14 +46,15 @@ public class HomePanel extends JPanel implements ActionListener {
 		logo.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		Date[] sessionDates = DbManager.getSession();
-		SimpleDateFormat df = new SimpleDateFormat("MMM dd, yyyy");
-		session = new JLabel("Session: "+df.format(sessionDates[0])+" - "+df.format(sessionDates[1]));
+		dateDispFormat = new SimpleDateFormat("MMM dd, yyyy");
+		session = new JLabel("Session: "+dateDispFormat.format(sessionDates[0])+" - "+dateDispFormat.format(sessionDates[1]));
 		session.setAlignmentX(Component.CENTER_ALIGNMENT);
 		session.setFont(new Font("Arial", Font.PLAIN, 24));
 		
 		setSession = new JButton("Set Session");
 		setSession.addActionListener(this);
 		setSession.setAlignmentX(Component.CENTER_ALIGNMENT);
+		setSession.setFont(new Font("Arial", Font.PLAIN, 16));
 		
 		info = new JLabel("Version "+Manager.version);
 		info.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -78,7 +80,7 @@ public class HomePanel extends JPanel implements ActionListener {
 						e1.printStackTrace();
 					}
 					Date[] sessionDates = DbManager.getSession();
-					session.setText("Session: "+df.format(sessionDates[0])+" - "+df.format(sessionDates[1]));
+					session.setText("Session: "+dateDispFormat.format(sessionDates[0])+" - "+dateDispFormat.format(sessionDates[1]));
 				}
 			}
 		}

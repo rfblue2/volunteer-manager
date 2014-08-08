@@ -3,8 +3,11 @@
  */
 package library.gui.panels;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -42,11 +45,16 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 	private static JTextField filterText;
 	private static JComboBox<String> filterFields;
 	private static JButton genLetters;
+	private Color lightBlue;
 	private TableRowSorter<VolunteerTableModel> sorter;
+	private Font arial16;
 	
 	public VolunteerPanel()	{
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBorder(new EmptyBorder(10, 10, 10, 10));//adds 10px padding
+		lightBlue = new Color(204, 204, 255);
+		setBackground(lightBlue);
+		arial16 = new Font("Arial", Font.PLAIN, 16);
 		
 		//instantiate table of volunteers
 		//table uses VolunteerTableModel
@@ -54,19 +62,27 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 		sorter = new TableRowSorter<VolunteerTableModel>(vtm);
 		volunteerTable = new JTable(vtm);
 		volunteerTable.setRowSorter(sorter);
+		volunteerTable.setPreferredScrollableViewportSize(Toolkit.getDefaultToolkit().getScreenSize());
 		JScrollPane tableScroll = new JScrollPane(volunteerTable);
 		volunteerTable.setFillsViewportHeight(true);
+		volunteerTable.getTableHeader().setFont(arial16);
 		
 		//instantiate buttons
 		JPanel buttonPanel = new JPanel();//holds the buttons
+		buttonPanel.setBackground(lightBlue);
 		add = new JButton("Add");
 		add.addActionListener(this);
+		add.setFont(arial16);
 		remove = new JButton("Remove");
 		remove.addActionListener(this);
+		remove.setFont(arial16);
 		filterLabel = new JLabel("Filter: ");
+		filterLabel.setFont(arial16);
 		filterFields = new JComboBox<String>(DbManager.getFields(DbManager.VOLUNTEERS).toArray(new String[DbManager.getFields(DbManager.VOLUNTEERS).size()]));
 		filterFields.addActionListener(this);
+		filterFields.setFont(arial16);
 		filterText = new JTextField(15);
+		filterText.setFont(arial16);
 		filterText.getDocument().addDocumentListener(new DocumentListener()	{
 			@Override
 			public void changedUpdate(DocumentEvent e) {newFilter();}
@@ -78,6 +94,7 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 		});
 		genLetters = new JButton("Generate Letters");
 		genLetters.addActionListener(this);
+		genLetters.setFont(arial16);
 		
 		buttonPanel.add(add);
 		buttonPanel.add(remove);
@@ -123,6 +140,13 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 			return;
 		}
 		sorter.setRowFilter(rf);
+	}
+	
+	/**
+	 * @return table model of volunteers
+	 */
+	public static VolunteerTableModel getVolunteerTableModel()	{
+		return (VolunteerTableModel) volunteerTable.getModel();
 	}
 	
 	private static class AddVolunteerDialog extends JDialog	{

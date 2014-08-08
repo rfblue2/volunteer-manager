@@ -3,6 +3,7 @@
  */
 package library.gui;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.text.SimpleDateFormat;
@@ -60,6 +61,7 @@ public class Manager {
 		tabPanel.addTab("Students", pStudents);
 		tabPanel.addTab("Volunteers", pVolunteers);
 		tabPanel.addTab("Pairing", pPairing);
+		
 		tabPanel.setFont(arial16);
 		
 		masterPanel.add(tabPanel);

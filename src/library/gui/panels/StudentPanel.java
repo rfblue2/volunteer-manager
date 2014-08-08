@@ -3,8 +3,12 @@
  */
 package library.gui.panels;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashMap;
@@ -41,7 +45,9 @@ public class StudentPanel extends JPanel implements ActionListener {
 	private static JLabel filterLabel;
 	private static JTextField filterText;
 	private static JComboBox<String> filterFields;
+	private Color lightRed;
 	private TableRowSorter<StudentTableModel> sorter;
+	private Font arial16;
 	
 	/**
 	 * 
@@ -49,6 +55,9 @@ public class StudentPanel extends JPanel implements ActionListener {
 	public StudentPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
 		setBorder(new EmptyBorder(10, 10, 10, 10));//adds 10px padding
+		lightRed = new Color(255, 204, 204);
+		setBackground(lightRed);
+		arial16 = new Font("Arial", Font.PLAIN, 16);
 		
 		//instantiate table of students
 		//table uses StudentTableModel
@@ -56,19 +65,27 @@ public class StudentPanel extends JPanel implements ActionListener {
 		sorter = new TableRowSorter<StudentTableModel>(stm);
 		studentTable = new JTable(stm);
 		studentTable.setRowSorter(sorter);
+		studentTable.setPreferredScrollableViewportSize(Toolkit.getDefaultToolkit().getScreenSize());
 		JScrollPane tableScroll = new JScrollPane(studentTable);
 		studentTable.setFillsViewportHeight(true);
+		studentTable.getTableHeader().setFont(arial16);
 		
 		//instantiate buttons
 		JPanel buttonPanel = new JPanel();//holds the buttons
+		buttonPanel.setBackground(lightRed);
 		add = new JButton("Add");
 		add.addActionListener(this);
+		add.setFont(arial16);
 		remove = new JButton("Remove");
 		remove.addActionListener(this);
+		remove.setFont(arial16);
 		filterLabel = new JLabel("Filter: ");
+		filterLabel.setFont(arial16);
 		filterFields = new JComboBox<String>(DbManager.getFields(DbManager.STUDENTS).toArray(new String[DbManager.getFields(DbManager.STUDENTS).size()]));
 		filterFields.addActionListener(this);
+		filterFields.setFont(arial16);
 		filterText = new JTextField(15);
+		filterText.setFont(arial16);
 		filterText.getDocument().addDocumentListener(new DocumentListener()	{
 			@Override
 			public void changedUpdate(DocumentEvent e) {newFilter();}
@@ -121,6 +138,13 @@ public class StudentPanel extends JPanel implements ActionListener {
 			return;
 		}
 		sorter.setRowFilter(rf);
+	}
+	
+	/**
+	 * @return table model of students
+	 */
+	public static StudentTableModel getStudentTableModel()	{
+		return (StudentTableModel) studentTable.getModel();
 	}
 	
 	private static class AddStudentDialog extends JDialog	{

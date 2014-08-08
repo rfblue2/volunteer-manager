@@ -269,6 +269,9 @@ public class DbManager {
 		XSSFSheet sheet = workbook.getSheet(obj);
 		Row row = sheet.getRow(r + 1);
 		Cell cell = row.getCell(c);
+		if(cell == null)	{
+			cell = row.createCell(c);
+		}
 		if(val instanceof String)
 			cell.setCellValue((String)val);
 		else if(val instanceof Long)
