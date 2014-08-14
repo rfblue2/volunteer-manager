@@ -11,6 +11,7 @@ import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.HashMap;
 import java.util.regex.PatternSyntaxException;
 
@@ -31,6 +32,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
 import library.database.DbManager;
+import library.database.LetterMaker;
 import library.database.Student;
 import library.gui.StudentTableModel;
 
@@ -45,6 +47,7 @@ public class StudentPanel extends JPanel implements ActionListener {
 	private static JLabel filterLabel;
 	private static JTextField filterText;
 	private static JComboBox<String> filterFields;
+	private static JButton genLetters;
 	private Color lightRed;
 	private TableRowSorter<StudentTableModel> sorter;
 	private Font arial16;
@@ -95,12 +98,16 @@ public class StudentPanel extends JPanel implements ActionListener {
 			public void removeUpdate(DocumentEvent e) {newFilter();}
 			
 		});
+		genLetters = new JButton("Generate Letters");
+		genLetters.addActionListener(this);
+		genLetters.setFont(arial16);
 		
 		buttonPanel.add(add);
 		buttonPanel.add(remove);
 		buttonPanel.add(filterLabel);
 		buttonPanel.add(filterFields);
 		buttonPanel.add(filterText);
+		buttonPanel.add(genLetters);
 		
 		//add components to studentPanel
 		add(tableScroll);
@@ -121,8 +128,29 @@ public class StudentPanel extends JPanel implements ActionListener {
 				int[] rows = studentTable.getSelectedRows();
 				for(int r = rows[rows.length - 1]; r >= rows[0]; r--)	{
 					int newR = studentTable.convertRowIndexToModel(r);
+					if(!DbManager.getStudents().get(newR).getAttribute("Volunteer").equals(""))	{
+						PairingPanel.unpair(DbManager.getStudents().get(newR));
+					}
 					stm.removeStudent((Integer.parseInt(studentTable.getModel().getValueAt(newR, 0).toString())));//gets the ID
 				}
+			}
+		}
+		else if(e.getSource() == genLetters)	{
+			File sFolder = new File("Student Letters");
+			try	{
+				sFolder.mkdir();
+			} catch(SecurityException e1)	{
+				e1.printStackTrace();
+			}
+			int[] rows = studentTable.getSelectedRows();
+			if(rows.length == 0)	{
+				JOptionPane.showMessageDialog(this, "Please select at least one student", "Error", JOptionPane.ERROR_MESSAGE);
+			} else	{
+				for(int r : rows)	{
+					int newR = studentTable.convertRowIndexToModel(r);
+					LetterMaker.genStudentNotification(DbManager.getStudents().get(newR), "Student Letters");
+				}
+				JOptionPane.showMessageDialog(this, "Generating Letters Complete", "Finished", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 	}
@@ -183,8 +211,8 @@ public class StudentPanel extends JPanel implements ActionListener {
 				panels[i].setAlignmentY(Component.BOTTOM_ALIGNMENT);
 				content.add(panels[i]);//add panel into the container
 			}
-			fields[0].setEditable(false);//do not allow editing ID
-			fields[0].setText(""+(DbManager.getStudents().size() + 1));
+			fields[DbManager.getFields("Students").indexOf("ID")].setEditable(false);//do not allow editing ID
+			fields[DbManager.getFields("Students").indexOf("ID")].setText(""+(DbManager.getStudents().size() + 1));
 			//init buttons
 			buttons = new JPanel();
 			ok = new JButton("Ok");

@@ -58,7 +58,7 @@ public class StudentTableModel extends AbstractTableModel implements TableModelL
 
 	@Override
 	public boolean isCellEditable(int r, int c) {
-		if(c < 2)
+		if(c < 1)
 			return false;
 		else
 			return true;
@@ -93,7 +93,6 @@ public class StudentTableModel extends AbstractTableModel implements TableModelL
 			data.get(i).setAttribute(0, Integer.parseInt(data.get(i).getAttribute(0).toString()) - 1);
 			fireTableCellUpdated(i, 0);
 		}
-		
 	}
 
 	@Override
@@ -107,4 +106,7 @@ public class StudentTableModel extends AbstractTableModel implements TableModelL
 		}
 	}
 	
+	public ArrayList<Student> getData()	{
+		return data;
+	}
 }

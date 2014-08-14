@@ -14,7 +14,7 @@ public class Volunteer {
 	private ArrayList<Object> attributes;
 	
 	public Volunteer()	{
-		fields = DbManager.getFields("Volunteers");
+		fields = DbManager.getFields(DbManager.VOLUNTEERS);
 		attributes = new ArrayList<Object>();
 		//prevent null pointer exception by initing values in arraylist
 		for(int i = 0; i < fields.size(); i++)
@@ -31,12 +31,34 @@ public class Volunteer {
 	}
 	
 	/**
+	 * Gets the attribute of volunteer given a string
+	 * @param a
+	 * @return
+	 */
+	public Object getAttribute(String a)	{
+		if(DbManager.getFields(DbManager.VOLUNTEERS).indexOf(a) != -1)
+			return attributes.get(DbManager.getFields(DbManager.VOLUNTEERS).indexOf(a));
+		else return 0;
+	}
+	
+	/**
 	 * Sets attribute of volunteer
 	 * @param index
 	 * @param value
 	 */
 	public void setAttribute(int id, Object val)	{
 		attributes.set(id,  val);
+	}
+
+	/**
+	 * Sets attribute of volunteer
+	 * @param id
+	 * @param value
+	 */
+	public void setAttribute(String a, Object val)	{
+		if(DbManager.getFields(DbManager.VOLUNTEERS).indexOf(a) != -1)
+			attributes.set(DbManager.getFields(DbManager.VOLUNTEERS).indexOf(a), val);
+		else System.out.println("Error: Volunteer attribute does not exist");
 	}
 	
 	@Override

@@ -29,6 +29,8 @@ public class DbManager {
 	private static FileInputStream fin;
 	private static FileOutputStream fout;
 	private static XSSFWorkbook workbook;
+	private static ArrayList<String> sfields;
+	private static ArrayList<String> vfields;
 	
 	/**
 	 * Opens file input stream to excel file
@@ -126,9 +128,23 @@ public class DbManager {
 	 * @return fields
 	 */
 	public static ArrayList<String> getFields(String sheetName)	{
+		ArrayList<String> fields = new ArrayList<String>();
+		switch(sheetName)	{
+		case "Students":
+			if(sfields != null)
+				return sfields;
+			else
+				sfields = fields;
+			break;
+		case "Volunteers":
+			if(vfields != null)
+				return vfields;
+			else
+				vfields = fields;
+			break;
+		}
 		openInputStream();
 		XSSFSheet sheet = workbook.getSheet(sheetName);
-		ArrayList<String> fields = new ArrayList<String>();
 		Iterator<Row> rowIterator = sheet.iterator();//iterator starts at the very beginning (fields)
 		Iterator<Cell> cellIterator = rowIterator.next().cellIterator();
 		while(cellIterator.hasNext())	{

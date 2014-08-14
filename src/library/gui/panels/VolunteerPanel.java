@@ -10,6 +10,8 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.regex.PatternSyntaxException;
 
@@ -30,6 +32,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.TableRowSorter;
 
 import library.database.DbManager;
+import library.database.LetterMaker;
 import library.database.Volunteer;
 import library.gui.VolunteerTableModel;
 
@@ -120,12 +123,30 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 				int[] rows = volunteerTable.getSelectedRows();
 				for(int r = rows[rows.length - 1]; r >= rows[0]; r--)	{
 					int newR = volunteerTable.convertRowIndexToModel(r);
+					if(!DbManager.getVolunteers().get(newR).getAttribute("Student").equals(""))	{
+						PairingPanel.unpair(DbManager.getVolunteers().get(newR));
+					}
 					vtm.removeVolunteer((Integer.parseInt(volunteerTable.getModel().getValueAt(newR, 0).toString())));//gets the ID
 				}
 			}
 		}
 		else if(e.getSource() == genLetters)	{
-			
+			File vFolder = new File("Volunteer Letters");
+			try	{
+				vFolder.mkdir();
+			} catch(SecurityException e1)	{
+				e1.printStackTrace();
+			}
+			int[] rows = volunteerTable.getSelectedRows();
+			if(rows.length == 0)	{
+				JOptionPane.showMessageDialog(this, "Please select at least one volunteer", "Error", JOptionPane.ERROR_MESSAGE);
+			} else	{
+				for(int r : rows)	{
+					int newR = volunteerTable.convertRowIndexToModel(r);
+					LetterMaker.genVolunteerNotification(DbManager.getVolunteers().get(newR), "Volunteer Letters");
+				}
+				JOptionPane.showMessageDialog(this, "Generating Letters Complete", "Finished", JOptionPane.INFORMATION_MESSAGE);
+			}
 		}
 	}
 	
@@ -185,8 +206,8 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 				panels[i].setAlignmentY(Component.BOTTOM_ALIGNMENT);
 				content.add(panels[i]);//add panel into the container
 			}
-			fields[0].setEditable(false);//do not allow editing ID
-			fields[0].setText(""+(DbManager.getVolunteers().size() + 1));
+			fields[DbManager.getFields(DbManager.VOLUNTEERS).indexOf("ID")].setEditable(false);//do not allow editing ID
+			fields[DbManager.getFields(DbManager.VOLUNTEERS).indexOf("ID")].setText(""+(DbManager.getVolunteers().size() + 1));
 			//init buttons
 			buttons = new JPanel();
 			ok = new JButton("Ok");

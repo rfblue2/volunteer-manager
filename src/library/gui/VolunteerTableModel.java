@@ -58,7 +58,7 @@ public class VolunteerTableModel extends AbstractTableModel implements TableMode
 
 	@Override
 	public boolean isCellEditable(int r, int c) {
-		if(c < 2)
+		if(c < 1)
 			return false;
 		else
 			return true;
@@ -105,5 +105,8 @@ public class VolunteerTableModel extends AbstractTableModel implements TableMode
 			DbManager.editAttribute(r, c, data, DbManager.VOLUNTEERS);
 		}
 	}
-	
+
+	public ArrayList<Volunteer> getData()	{
+		return data;
+	}
 }

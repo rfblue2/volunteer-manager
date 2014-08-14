@@ -19,7 +19,7 @@ public class Student {
 	 * 
 	 */
 	public Student() {
-		fields = DbManager.getFields("Students");
+		fields = DbManager.getFields(DbManager.STUDENTS);
 		attributes = new ArrayList<Object>();
 		//prevent null pointer exception by initing values in arraylist
 		for(int i = 0; i < fields.size(); i++)
@@ -46,12 +46,34 @@ public class Student {
 	}
 	
 	/**
+	 * Gets the attribute of student given a string
+	 * @param a
+	 * @return
+	 */
+	public Object getAttribute(String a)	{
+		if(DbManager.getFields(DbManager.STUDENTS).indexOf(a) != -1)
+			return attributes.get(DbManager.getFields(DbManager.STUDENTS).indexOf(a));
+		else return 0;
+	}
+	
+	/**
 	 * Sets attribute of student
 	 * @param id
 	 * @param value
 	 */
 	public void setAttribute(int id, Object val)	{
 		attributes.set(id, val);
+	}
+
+	/**
+	 * Sets attribute of student
+	 * @param id
+	 * @param value
+	 */
+	public void setAttribute(String a, Object val)	{
+		if(DbManager.getFields(DbManager.STUDENTS).indexOf(a) != -1)
+			attributes.set(DbManager.getFields(DbManager.STUDENTS).indexOf(a), val);
+		else System.out.println("Error: Student attribute does not exist");
 	}
 	
 	@Override
