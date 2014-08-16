@@ -24,7 +24,7 @@ import library.gui.Manager;
 
 /**
  * @author Roland
- *
+ * Displays the Date, Session, and Version
  */
 public class HomePanel extends JPanel implements ActionListener {
 	private static JLabel logo;

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 
 import javax.swing.table.AbstractTableModel;
 
-import library.database.DbManager;
 import library.database.Pair;
 import library.database.StringUtility;
 import library.database.Student;

@@ -11,7 +11,6 @@ import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.regex.PatternSyntaxException;
 
@@ -19,6 +18,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -38,7 +38,7 @@ import library.gui.VolunteerTableModel;
 
 /**
  * @author Roland
- *
+ * Displays a table of volunteers and actions
  */
 public class VolunteerPanel extends JPanel implements ActionListener {
 	private static JTable volunteerTable;
@@ -51,6 +51,7 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 	private Color lightBlue;
 	private TableRowSorter<VolunteerTableModel> sorter;
 	private Font arial16;
+	private JFileChooser fChooser;
 	
 	public VolunteerPanel()	{
 		setLayout(new BoxLayout(this, BoxLayout.PAGE_AXIS));
@@ -99,6 +100,8 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 		genLetters.addActionListener(this);
 		genLetters.setFont(arial16);
 		
+		fChooser = new JFileChooser();
+		
 		buttonPanel.add(add);
 		buttonPanel.add(remove);
 		buttonPanel.add(filterLabel);
@@ -114,7 +117,7 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == add)	{
-			AddVolunteerDialog asd = new AddVolunteerDialog();
+			new AddVolunteerDialog();
 		}
 		else if(e.getSource() == remove)	{
 			if(JOptionPane.showConfirmDialog(this, "Are you sure you want to remove Volunteers?") == JOptionPane.YES_OPTION)	{
@@ -131,19 +134,27 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 			}
 		}
 		else if(e.getSource() == genLetters)	{
-			File vFolder = new File("Volunteer Letters");
+			File vFolder = null;
+			String path = null;
+			int val = fChooser.showSaveDialog(fChooser);
+			if(val == JFileChooser.APPROVE_OPTION)	{
+				path = fChooser.getSelectedFile().getPath();
+				vFolder = new File(path);
+			}
+			
 			try	{
 				vFolder.mkdir();
 			} catch(SecurityException e1)	{
 				e1.printStackTrace();
 			}
+			
 			int[] rows = volunteerTable.getSelectedRows();
 			if(rows.length == 0)	{
 				JOptionPane.showMessageDialog(this, "Please select at least one volunteer", "Error", JOptionPane.ERROR_MESSAGE);
 			} else	{
 				for(int r : rows)	{
 					int newR = volunteerTable.convertRowIndexToModel(r);
-					LetterMaker.genVolunteerNotification(DbManager.getVolunteers().get(newR), "Volunteer Letters");
+					LetterMaker.genVolunteerNotification(DbManager.getVolunteers().get(newR), path);
 				}
 				JOptionPane.showMessageDialog(this, "Generating Letters Complete", "Finished", JOptionPane.INFORMATION_MESSAGE);
 			}
@@ -170,6 +181,11 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 		return (VolunteerTableModel) volunteerTable.getModel();
 	}
 	
+	/**
+	 * Dialog allowing user to add volunteer
+	 * @author Roland
+	 *
+	 */
 	private static class AddVolunteerDialog extends JDialog	{
 		
 		private Container content;
@@ -208,6 +224,7 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 			}
 			fields[DbManager.getFields(DbManager.VOLUNTEERS).indexOf("ID")].setEditable(false);//do not allow editing ID
 			fields[DbManager.getFields(DbManager.VOLUNTEERS).indexOf("ID")].setText(""+(DbManager.getVolunteers().size() + 1));
+			fields[DbManager.getFields(DbManager.VOLUNTEERS).indexOf("Student")].setEditable(false);//do not allow editing pair this way
 			//init buttons
 			buttons = new JPanel();
 			ok = new JButton("Ok");

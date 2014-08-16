@@ -3,7 +3,6 @@
  */
 package library.database;
 
-import java.util.Collections;
 import java.util.HashMap;
 
 /**
@@ -51,7 +50,7 @@ public class StringUtility {
 	}
 	
 	/**
-	 * Formats phone number into (XXX) XXX - XXXX
+	 * Formats phone number into (###) ###-####
 	 * @param phone
 	 * @return formatted phone number
 	 */

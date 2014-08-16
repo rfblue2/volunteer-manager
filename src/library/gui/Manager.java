@@ -3,7 +3,6 @@
  */
 package library.gui;
 
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
 import java.text.SimpleDateFormat;

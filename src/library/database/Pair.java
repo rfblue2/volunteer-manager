@@ -5,7 +5,7 @@ package library.database;
 
 /**
  * @author Roland
- *
+ * Represents a pair between student and volunteer
  */
 public class Pair {
 	public Student student;

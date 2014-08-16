@@ -21,7 +21,6 @@ public class StudentTableModel extends AbstractTableModel implements TableModelL
 	
 	//temporary, filler column names; later retrieve from database
 	private ArrayList<String> colNames;
-
 	private ArrayList<Student> data;
 	
 	public StudentTableModel()	{
@@ -106,6 +105,9 @@ public class StudentTableModel extends AbstractTableModel implements TableModelL
 		}
 	}
 	
+	/**
+	 * @return data as arraylist
+	 */
 	public ArrayList<Student> getData()	{
 		return data;
 	}

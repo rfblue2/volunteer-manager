@@ -4,6 +4,7 @@
 package library.database;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * @author Roland
@@ -11,14 +12,14 @@ import java.util.ArrayList;
  */
 public class Volunteer {
 	public static ArrayList<String> fields;//set from database
-	private ArrayList<Object> attributes;
+	private HashMap<String, Object> attributes;
 	
 	public Volunteer()	{
 		fields = DbManager.getFields(DbManager.VOLUNTEERS);
-		attributes = new ArrayList<Object>();
+		attributes = new HashMap<String, Object>();
 		//prevent null pointer exception by initing values in arraylist
 		for(int i = 0; i < fields.size(); i++)
-			attributes.add("");
+			attributes.put(fields.get(i), "");
 	}
 	
 	/**
@@ -27,7 +28,7 @@ public class Volunteer {
 	 * @return attribute
 	 */
 	public Object getAttribute(int id)	{
-		return attributes.get(id);
+		return attributes.get(fields.get(id));
 	}
 	
 	/**
@@ -36,8 +37,8 @@ public class Volunteer {
 	 * @return
 	 */
 	public Object getAttribute(String a)	{
-		if(DbManager.getFields(DbManager.VOLUNTEERS).indexOf(a) != -1)
-			return attributes.get(DbManager.getFields(DbManager.VOLUNTEERS).indexOf(a));
+		if(fields.indexOf(a) >= 0)
+			return attributes.get(a);
 		else return 0;
 	}
 	
@@ -47,7 +48,7 @@ public class Volunteer {
 	 * @param value
 	 */
 	public void setAttribute(int id, Object val)	{
-		attributes.set(id,  val);
+		attributes.put(fields.get(id), val);
 	}
 
 	/**
@@ -56,8 +57,8 @@ public class Volunteer {
 	 * @param value
 	 */
 	public void setAttribute(String a, Object val)	{
-		if(DbManager.getFields(DbManager.VOLUNTEERS).indexOf(a) != -1)
-			attributes.set(DbManager.getFields(DbManager.VOLUNTEERS).indexOf(a), val);
+		if(fields.indexOf(a) >= 0)
+			attributes.put(a, val);
 		else System.out.println("Error: Volunteer attribute does not exist");
 	}
 	
@@ -65,7 +66,7 @@ public class Volunteer {
 	public String toString()	{
 		String s = "[";
 		for(int i = 0; i < fields.size(); i++)
-			s = s + fields.get(i) + ": " + attributes.get(i)+", ";
+			s = s + fields.get(i) + ": " + attributes.get(fields.get(i))+", ";
 		s = s + "]";
 		return s;
 	}

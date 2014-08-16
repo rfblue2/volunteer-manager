@@ -1,0 +1,4 @@
+Change Student/Volunteer name is not reflected in corresponding Volunteer/Student's pair (in student tab or volunteer tab).
+
+batch print by selecting actual files and then right-click print
+

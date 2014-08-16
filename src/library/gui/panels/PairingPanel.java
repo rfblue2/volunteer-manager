@@ -19,7 +19,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
-import javax.swing.SpringLayout;
 import javax.swing.table.TableRowSorter;
 
 import library.database.DbManager;
@@ -153,11 +152,11 @@ public class PairingPanel extends JPanel implements ActionListener	{
 	/**
 	 * Populates table of student-volunteer pairs
 	 */
-	private void putPairsToPairTable()	{//TODO account for volunteers with fake students
+	private void putPairsToPairTable()	{
+		ArrayList<Volunteer> volunteers = ((VolunteerTableModel)volunteerTable.getModel()).getData();
 		for(Student s : ((StudentTableModel)studentTable.getModel()).getData())	{
 			String vName = (String) s.getAttribute("Volunteer");
 			if(vName != null)	{
-				ArrayList<Volunteer> volunteers = ((VolunteerTableModel)volunteerTable.getModel()).getData();
 				String[] name = vName.split(" ");
 				for(Volunteer v : volunteers)	{
 					if(v.getAttribute("First Name").equals(name[0])
@@ -168,7 +167,7 @@ public class PairingPanel extends JPanel implements ActionListener	{
 			}
 		}
 	}
-	
+/* ************************************************************************8	
 	private void autoPair()	{
 		//gale-shapley, note suitor optimal (i.e. better for students)
 		//note these are temporary ArrayList, so make new ArrayList and then place data into them
@@ -194,7 +193,7 @@ public class PairingPanel extends JPanel implements ActionListener	{
 		 *  Algorithm 2 variation
 		 *  When searching paired, swap out first match that works
 		 *  Problem: what if two continually swap out...?
-		 */
+		 *
 		while(uStu.size() > 0 && uVol.size() > 0)	{
 			Pair best = new Pair(uStu.get(0), tVol.get(0));
 			//now cycle through all possibilities until get the best one
@@ -207,7 +206,7 @@ public class PairingPanel extends JPanel implements ActionListener	{
 	 * @param p1
 	 * @param p2
 	 * @return
-	 */
+	 *
 	private int compare(Pair p1, Pair p2)	{
 		//Check requested volunteer/buddy (return either 1 or 0, otherwise continue)
 		String[] name1 = ((String) p1.student.getAttribute("Volunteer")).split(" ");
@@ -259,7 +258,7 @@ public class PairingPanel extends JPanel implements ActionListener	{
 			return -1;
 		return 0;
 	}
-	
+*************************************************************************************** */
 	/**
 	 * Unpair the pair this volunteer is in
 	 * @param v
@@ -351,7 +350,7 @@ public class PairingPanel extends JPanel implements ActionListener	{
 		if(e.getSource() == autoPair)	{
 			
 		}
-		else if(e.getSource() == manPair)	{//TODO when remove student/volunteer, also remove pair
+		else if(e.getSource() == manPair)	{
 			if(studentTable.getSelectedRowCount() != 1 || volunteerTable.getSelectedRowCount() != 1)	{
 				JOptionPane.showMessageDialog(this, "Please select 1 volunteer and 1 student", "Error", JOptionPane.ERROR_MESSAGE);
 			}

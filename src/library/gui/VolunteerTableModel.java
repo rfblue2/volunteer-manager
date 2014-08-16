@@ -21,7 +21,6 @@ public class VolunteerTableModel extends AbstractTableModel implements TableMode
 	
 	//temporary, filler column names; later retrieve from database
 	private ArrayList<String> colNames;
-
 	private ArrayList<Volunteer> data;
 	
 	public VolunteerTableModel()	{
@@ -106,6 +105,10 @@ public class VolunteerTableModel extends AbstractTableModel implements TableMode
 		}
 	}
 
+	/**
+	 * 
+	 * @return data as arraylist
+	 */
 	public ArrayList<Volunteer> getData()	{
 		return data;
 	}

@@ -8,19 +8,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
-import org.apache.poi.xwpf.model.XWPFHeaderFooterPolicy;
 import org.apache.poi.xwpf.usermodel.BodyElementType;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.poi.xwpf.usermodel.XWPFHeaderFooter;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
 
@@ -100,7 +96,7 @@ public class LetterMaker {
 		volunteerFields = new HashMap<String, Object>();
 		//TODO predetermine hashmap based on something... don't manually code unless last resort
 		ArrayList<Student> students = DbManager.getStudents();
-		Student student;
+		Student student = null;
 		for(Student s : students)	{
 			if(StringUtility.getFullName(s).equals(v.getAttribute("Student")))	{
 				student = s;
@@ -119,7 +115,12 @@ public class LetterMaker {
 				break;
 			}
 		}
-		//TODO account for null student
+
+		if(student == null)	{
+			closeInputStream();
+			return;
+		}
+		
 		XWPFDocument newDoc = doc.getXWPFDocument();
 		Iterator<IBodyElement> bodyIterator = newDoc.getBodyElementsIterator();
 		for(int i = 0; bodyIterator.hasNext(); i++)	{
@@ -149,6 +150,7 @@ public class LetterMaker {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		closeOutputStream();
 	}
 	
 
@@ -162,7 +164,7 @@ public class LetterMaker {
 		studentFields = new HashMap<String, Object>();
 		//TODO predetermine hashmap based on something... don't manually code unless last resort
 		ArrayList<Volunteer> volunteers = DbManager.getVolunteers();
-		Volunteer volunteer;
+		Volunteer volunteer = null;
 		for(Volunteer v : volunteers)	{
 			if(StringUtility.getFullName(v).equals(s.getAttribute("Volunteer")))	{
 				volunteer = v;
@@ -181,7 +183,12 @@ public class LetterMaker {
 				break;
 			}
 		}
-		//TODO account for null volunteer
+		
+		if(volunteer == null)	{
+			closeInputStream();
+			return;
+		}
+		
 		XWPFDocument newDoc = doc.getXWPFDocument();
 		Iterator<IBodyElement> bodyIterator = newDoc.getBodyElementsIterator();
 		for(int i = 0; bodyIterator.hasNext(); i++)	{
@@ -211,5 +218,6 @@ public class LetterMaker {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		closeOutputStream();
 	}
 }

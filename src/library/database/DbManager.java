@@ -19,6 +19,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 /**
  * @author Roland
+ * Manages interface between program and excel database
  */
 public class DbManager {
 	
@@ -38,7 +39,7 @@ public class DbManager {
 	private static void openInputStream()	{
 		//init file and workbook
 		try {
-			fin = new FileInputStream(new File(dataFile));
+			fin = new FileInputStream(new File("./"+dataFile));
 			workbook = new XSSFWorkbook(fin);
 		} catch (FileNotFoundException e1) {
 			e1.printStackTrace();

@@ -4,8 +4,8 @@
 package library.database;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
-//TODO for flexibility, try a hashmap of attributes
 /**
  * @author Roland
  *
@@ -13,28 +13,18 @@ import java.util.ArrayList;
 public class Student {
 	
 	public static ArrayList<String> fields;//set from database
-	private ArrayList<Object> attributes;
+	private HashMap<String, Object> attributes;
 
 	/**
 	 * 
 	 */
 	public Student() {
 		fields = DbManager.getFields(DbManager.STUDENTS);
-		attributes = new ArrayList<Object>();
+		attributes = new HashMap<String, Object>();
 		//prevent null pointer exception by initing values in arraylist
 		for(int i = 0; i < fields.size(); i++)
-			attributes.add("");
+			attributes.put(fields.get(i), "");
 	}
-	
-	/**
-	 * @return the phoneNumber as String
-	 */
-	/*public String getPhoneNumberAsString()	{
-		String number = "(" + String.valueOf((phoneNumber - (phoneNumber % 10000000)) / 10000000) + ") ";
-		number = number + String.valueOf(((phoneNumber % 10000000) - (phoneNumber % 10000)) / (10000)) + "-";
-		number = number + String.valueOf(phoneNumber % 10000);
-		return number;
-	}*/
 	
 	/**
 	 * Gets attribute of student
@@ -42,7 +32,7 @@ public class Student {
 	 * @return attribute
 	 */
 	public Object getAttribute(int id)	{
-		return attributes.get(id);
+		return attributes.get(fields.get(id));
 	}
 	
 	/**
@@ -51,8 +41,8 @@ public class Student {
 	 * @return
 	 */
 	public Object getAttribute(String a)	{
-		if(DbManager.getFields(DbManager.STUDENTS).indexOf(a) != -1)
-			return attributes.get(DbManager.getFields(DbManager.STUDENTS).indexOf(a));
+		if(fields.indexOf(a) >= 0)
+			return attributes.get(a);
 		else return 0;
 	}
 	
@@ -62,7 +52,7 @@ public class Student {
 	 * @param value
 	 */
 	public void setAttribute(int id, Object val)	{
-		attributes.set(id, val);
+		attributes.put(fields.get(id), val);
 	}
 
 	/**
@@ -71,8 +61,8 @@ public class Student {
 	 * @param value
 	 */
 	public void setAttribute(String a, Object val)	{
-		if(DbManager.getFields(DbManager.STUDENTS).indexOf(a) != -1)
-			attributes.set(DbManager.getFields(DbManager.STUDENTS).indexOf(a), val);
+		if(fields.indexOf(a) >= 0)
+			attributes.put(a, val);
 		else System.out.println("Error: Student attribute does not exist");
 	}
 	
@@ -80,7 +70,7 @@ public class Student {
 	public String toString()	{
 		String s = "[";
 		for(int i = 0; i < fields.size(); i++)
-			s = s + fields.get(i) + ": " + attributes.get(i)+", ";
+			s = s + fields.get(i) + ": " + attributes.get(fields.get(i))+", ";
 		s = s + "]";
 		return s;
 	}

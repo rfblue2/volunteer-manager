@@ -7,7 +7,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
-import java.awt.Graphics;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -19,6 +18,7 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -38,7 +38,7 @@ import library.gui.StudentTableModel;
 
 /**
  * @author Roland
- *
+ * Displays a table of students and actions
  */
 public class StudentPanel extends JPanel implements ActionListener {
 	private static JTable studentTable;
@@ -51,6 +51,7 @@ public class StudentPanel extends JPanel implements ActionListener {
 	private Color lightRed;
 	private TableRowSorter<StudentTableModel> sorter;
 	private Font arial16;
+	private JFileChooser fChooser;
 	
 	/**
 	 * 
@@ -102,6 +103,8 @@ public class StudentPanel extends JPanel implements ActionListener {
 		genLetters.addActionListener(this);
 		genLetters.setFont(arial16);
 		
+		fChooser = new JFileChooser();
+		
 		buttonPanel.add(add);
 		buttonPanel.add(remove);
 		buttonPanel.add(filterLabel);
@@ -118,7 +121,7 @@ public class StudentPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if(e.getSource() == add)	{
 			System.out.println("add student");
-			AddStudentDialog asd = new AddStudentDialog();
+			new AddStudentDialog();
 		}
 		else if(e.getSource() == remove)	{
 			System.out.println("remove student");
@@ -136,19 +139,27 @@ public class StudentPanel extends JPanel implements ActionListener {
 			}
 		}
 		else if(e.getSource() == genLetters)	{
-			File sFolder = new File("Student Letters");
+			File sFolder = null;
+			String path = null;
+			int val = fChooser.showSaveDialog(fChooser);
+			if(val == JFileChooser.APPROVE_OPTION)	{
+				path = fChooser.getSelectedFile().getPath();
+				sFolder = new File(path);
+			}
+			
 			try	{
 				sFolder.mkdir();
 			} catch(SecurityException e1)	{
 				e1.printStackTrace();
 			}
+			
 			int[] rows = studentTable.getSelectedRows();
 			if(rows.length == 0)	{
 				JOptionPane.showMessageDialog(this, "Please select at least one student", "Error", JOptionPane.ERROR_MESSAGE);
 			} else	{
 				for(int r : rows)	{
 					int newR = studentTable.convertRowIndexToModel(r);
-					LetterMaker.genStudentNotification(DbManager.getStudents().get(newR), "Student Letters");
+					LetterMaker.genStudentNotification(DbManager.getStudents().get(newR), path);
 				}
 				JOptionPane.showMessageDialog(this, "Generating Letters Complete", "Finished", JOptionPane.INFORMATION_MESSAGE);
 			}
@@ -175,6 +186,11 @@ public class StudentPanel extends JPanel implements ActionListener {
 		return (StudentTableModel) studentTable.getModel();
 	}
 	
+	/**
+	 * Displays a dialog to add students
+	 * @author Roland
+	 *
+	 */
 	private static class AddStudentDialog extends JDialog	{
 		
 		private Container content;
@@ -211,8 +227,9 @@ public class StudentPanel extends JPanel implements ActionListener {
 				panels[i].setAlignmentY(Component.BOTTOM_ALIGNMENT);
 				content.add(panels[i]);//add panel into the container
 			}
-			fields[DbManager.getFields("Students").indexOf("ID")].setEditable(false);//do not allow editing ID
-			fields[DbManager.getFields("Students").indexOf("ID")].setText(""+(DbManager.getStudents().size() + 1));
+			fields[DbManager.getFields(DbManager.STUDENTS).indexOf("ID")].setEditable(false);//do not allow editing ID
+			fields[DbManager.getFields(DbManager.STUDENTS).indexOf("ID")].setText(""+(DbManager.getStudents().size() + 1));
+			fields[DbManager.getFields(DbManager.STUDENTS).indexOf("Volunteer")].setEditable(false);//do not allow editing pair this way
 			//init buttons
 			buttons = new JPanel();
 			ok = new JButton("Ok");
