@@ -2,6 +2,8 @@ package library.gui.panels;
 
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
@@ -35,14 +37,8 @@ public class HomePanel extends JPanel implements ActionListener {
 	
 	public HomePanel()	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		
-		//initialize image logo
-		try {
-			BufferedImage img = ImageIO.read(new File("logo.png"));
-			logo = new JLabel(new ImageIcon(img));
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		Image img = Toolkit.getDefaultToolkit().getImage(getClass().getResource("logo.png"));
+		logo = new JLabel(new ImageIcon(img));
 		logo.setAlignmentX(Component.CENTER_ALIGNMENT);
 		
 		Date[] sessionDates = DbManager.getSession();

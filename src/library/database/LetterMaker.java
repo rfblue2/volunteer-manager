@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.swing.JOptionPane;
+
 import org.apache.poi.xwpf.usermodel.BodyElementType;
 import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
@@ -47,6 +49,7 @@ public class LetterMaker {
 			fin = new FileInputStream(new File("./"+data));
 			doc = new XWPFDocument(fin);
 		} catch (FileNotFoundException e1) {
+			JOptionPane.showMessageDialog(null, "Could not find "+data, "Error", JOptionPane.ERROR_MESSAGE);
 			e1.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();

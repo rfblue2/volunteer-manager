@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 
+import javax.swing.JOptionPane;
+
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -42,6 +44,7 @@ public class DbManager {
 			fin = new FileInputStream(new File("./"+dataFile));
 			workbook = new XSSFWorkbook(fin);
 		} catch (FileNotFoundException e1) {
+			JOptionPane.showMessageDialog(null, "Could not find data.xlsx", "Error", JOptionPane.ERROR_MESSAGE);
 			e1.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();

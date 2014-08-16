@@ -27,7 +27,7 @@ import library.gui.panels.VolunteerPanel;
  */
 public class Manager {
 	
-	public static final double version = 0.1;
+	public static final double version = 1.0;
 	
 	//Panels
 	private static JPanel masterPanel;
