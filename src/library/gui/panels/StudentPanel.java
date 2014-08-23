@@ -6,11 +6,13 @@ package library.gui.panels;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.PatternSyntaxException;
 
@@ -41,6 +43,10 @@ import library.gui.StudentTableModel;
  * Displays a table of students and actions
  */
 public class StudentPanel extends JPanel implements ActionListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2980697251806384042L;
 	private static JTable studentTable;
 	private static JButton add;
 	private static JButton remove;
@@ -48,6 +54,7 @@ public class StudentPanel extends JPanel implements ActionListener {
 	private static JTextField filterText;
 	private static JComboBox<String> filterFields;
 	private static JButton genLetters;
+	private static JButton genLabels;
 	private Color lightRed;
 	private TableRowSorter<StudentTableModel> sorter;
 	private Font arial16;
@@ -103,6 +110,10 @@ public class StudentPanel extends JPanel implements ActionListener {
 		genLetters.addActionListener(this);
 		genLetters.setFont(arial16);
 		
+		genLabels = new JButton("Generate Labels");
+		genLabels.addActionListener(this);
+		genLabels.setFont(arial16);
+		
 		fChooser = new JFileChooser();
 		
 		buttonPanel.add(add);
@@ -111,6 +122,7 @@ public class StudentPanel extends JPanel implements ActionListener {
 		buttonPanel.add(filterFields);
 		buttonPanel.add(filterText);
 		buttonPanel.add(genLetters);
+		buttonPanel.add(genLabels);
 		
 		//add components to studentPanel
 		add(tableScroll);
@@ -157,11 +169,33 @@ public class StudentPanel extends JPanel implements ActionListener {
 			if(rows.length == 0)	{
 				JOptionPane.showMessageDialog(this, "Please select at least one student", "Error", JOptionPane.ERROR_MESSAGE);
 			} else	{
+				this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 				for(int r : rows)	{
 					int newR = studentTable.convertRowIndexToModel(r);
 					LetterMaker.genStudentNotification(DbManager.getStudents().get(newR), path);
 				}
+				this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 				JOptionPane.showMessageDialog(this, "Generating Letters Complete", "Finished", JOptionPane.INFORMATION_MESSAGE);
+			}
+		}
+		else if(e.getSource() == genLabels)	{
+			String path = null;
+			int val = fChooser.showSaveDialog(fChooser);
+			if(val == JFileChooser.APPROVE_OPTION)
+				path = fChooser.getSelectedFile().getPath() + ".docx";
+			int[] rows = studentTable.getSelectedRows();
+			if(rows.length == 0)	{
+				JOptionPane.showMessageDialog(this, "Please select at least one student", "Error", JOptionPane.ERROR_MESSAGE);
+			} else	{
+				this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+				ArrayList<Student> stus = new ArrayList<Student>();
+				for(int r : rows)	{
+					int newR = studentTable.convertRowIndexToModel(r);
+					stus.add(DbManager.getStudents().get(newR));
+				}//TODO alphabetize
+				LetterMaker.genLabels(stus, path);
+				this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				JOptionPane.showMessageDialog(this, "Generating Labels Complete", "Finished", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 	}
@@ -193,6 +227,10 @@ public class StudentPanel extends JPanel implements ActionListener {
 	 */
 	private static class AddStudentDialog extends JDialog	{
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -2974940935633723763L;
 		private Container content;
 		private JTextField[] fields;
 		private JLabel[] fieldLabels;

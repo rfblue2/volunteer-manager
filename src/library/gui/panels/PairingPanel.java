@@ -3,22 +3,25 @@
  */
 package library.gui.panels;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.regex.PatternSyntaxException;
 
+import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.RowFilter;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.table.TableRowSorter;
 
 import library.database.DbManager;
@@ -36,6 +39,10 @@ import library.gui.VolunteerTableModel;
  */
 public class PairingPanel extends JPanel implements ActionListener	{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3344213999925900894L;
 	private static JTable studentTable;//unpaired students
 	private static JTable volunteerTable;//unpaired volunteers
 	private static TableRowSorter<StudentTableModel> studentSorter;
@@ -62,9 +69,8 @@ public class PairingPanel extends JPanel implements ActionListener	{
 		studentSorter = new TableRowSorter<StudentTableModel>(StudentPanel.getStudentTableModel());
 		studentTable = new JTable(StudentPanel.getStudentTableModel());
 		studentTable.setFillsViewportHeight(true);
-		studentTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		studentTable.setRowSorter(studentSorter);
-		studentTable.getTableHeader().setFont(arial16);
+		setCommonProperties(studentTable);
 		RowFilter<Object, Object> rfs = null;
 		try	{
 			rfs = RowFilter.notFilter(RowFilter.regexFilter("..*",  DbManager.getFields(DbManager.STUDENTS).indexOf("Volunteer")));
@@ -78,9 +84,8 @@ public class PairingPanel extends JPanel implements ActionListener	{
 		volunteerSorter = new TableRowSorter<VolunteerTableModel>(VolunteerPanel.getVolunteerTableModel());
 		volunteerTable = new JTable(VolunteerPanel.getVolunteerTableModel());
 		volunteerTable.setFillsViewportHeight(true);
-		volunteerTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		volunteerTable.setRowSorter(volunteerSorter);
-		volunteerTable.getTableHeader().setFont(arial16);
+		setCommonProperties(volunteerTable);
 		RowFilter<Object, Object> rfv = null;
 		try	{
 			rfv = RowFilter.notFilter(RowFilter.regexFilter("..*",  DbManager.getFields(DbManager.VOLUNTEERS).indexOf("Student")));
@@ -93,35 +98,23 @@ public class PairingPanel extends JPanel implements ActionListener	{
 		
 		pairTable = new JTable();
 		pairTable.setModel(new PairTableModel());
-		pairTable.setFillsViewportHeight(true);
-		pairTable.getTableHeader().setFont(arial16);
+		setCommonProperties(pairTable);
+		pairTable.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 		
 		//add pairs to the table
 		putPairsToPairTable();
 
-		JPanel studentPanel = new JPanel();
-		studentPanel.setLayout(new BorderLayout());
-		JLabel unpairedStudents = new JLabel("Unpaired Students");
-		unpairedStudents.setFont(arial16);
-		studentPanel.add(unpairedStudents, BorderLayout.PAGE_START);
-		studentPanel.add(new JScrollPane(studentTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS), BorderLayout.LINE_END);
+		JScrollPane studentPanel = new JScrollPane(studentTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		studentPanel.setBackground(lightPurple);
+		studentPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Unpaired Students", TitledBorder.LEFT, TitledBorder.CENTER, arial16));
 		
-		JPanel volunteerPanel = new JPanel();
-		volunteerPanel.setLayout(new BorderLayout());
-		JLabel unpairedVolunteers = new JLabel("Unpaired Volunteers");
-		unpairedVolunteers.setFont(arial16);
-		volunteerPanel.add(unpairedVolunteers, BorderLayout.PAGE_START);
-		volunteerPanel.add(new JScrollPane(volunteerTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS), BorderLayout.LINE_END);
+		JScrollPane volunteerPanel = new JScrollPane(volunteerTable, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
 		volunteerPanel.setBackground(lightPurple);
+		volunteerPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Unpaired Volunteers", TitledBorder.LEFT, TitledBorder.CENTER, arial16));
 		
-		JPanel pairPanel = new JPanel();
-		pairPanel.setLayout(new BorderLayout());
-		JLabel pairs = new JLabel("Pairs");
-		pairs.setFont(arial16);
-		pairPanel.add(pairs, BorderLayout.PAGE_START);
-		pairPanel.add(new JScrollPane(pairTable), BorderLayout.LINE_END);
+		JScrollPane pairPanel = new JScrollPane(pairTable);
 		pairPanel.setBackground(lightPurple);
+		pairPanel.setBorder(BorderFactory.createTitledBorder(new EtchedBorder(), "Pairs", TitledBorder.LEFT, TitledBorder.CENTER, arial16));
 		
 		tables.add(studentPanel);
 		tables.add(pairPanel);
@@ -132,21 +125,35 @@ public class PairingPanel extends JPanel implements ActionListener	{
 		buttons = new JPanel();
 		buttons.setBackground(lightPurple);
 		
-		autoPair = new JButton("Automatically Pair");
+		autoPair = new JButton("Auto Pair");
 		autoPair.addActionListener(this);
 		autoPair.setEnabled(false);
+		autoPair.setFont(arial16);
 		
 		manPair = new JButton("Manually Pair");
 		manPair.addActionListener(this);
+		manPair.setFont(arial16);
 		
 		unpair = new JButton("Delete Pair(s)");
 		unpair.addActionListener(this);
+		unpair.setFont(arial16);
 		
 		buttons.add(autoPair);
 		buttons.add(manPair);
 		buttons.add(unpair);
 		
 		add(buttons);
+	}
+	
+	/**
+	 * Sets common properties of tables to save some code space
+	 * @param t table
+	 */
+	private void setCommonProperties(JTable t)	{
+		t.setFillsViewportHeight(true);
+		t.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		t.getTableHeader().setFont(arial16);
+		t.setPreferredScrollableViewportSize(Toolkit.getDefaultToolkit().getScreenSize());
 	}
 
 	/**
@@ -386,10 +393,12 @@ public class PairingPanel extends JPanel implements ActionListener	{
 		else if(e.getSource() == unpair)	{
 
 			if(pairTable.getSelectedRowCount() > 0)	{
+				this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 				int rows[] = pairTable.getSelectedRows();
 				for(int i = rows.length; i > 0; i--)	{
 					unpair(rows[i - 1]);
 				}
+				this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 			} else	{
 				JOptionPane.showMessageDialog(this, "Please Select Pairs", "Error", JOptionPane.ERROR_MESSAGE);
 			}

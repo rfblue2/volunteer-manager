@@ -19,6 +19,10 @@ import library.database.Volunteer;
  */
 public class VolunteerTableModel extends AbstractTableModel implements TableModelListener {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8057603290587811096L;
 	//temporary, filler column names; later retrieve from database
 	private ArrayList<String> colNames;
 	private ArrayList<Volunteer> data;

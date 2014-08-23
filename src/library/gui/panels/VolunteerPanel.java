@@ -6,11 +6,13 @@ package library.gui.panels;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.regex.PatternSyntaxException;
 
@@ -41,6 +43,10 @@ import library.gui.VolunteerTableModel;
  * Displays a table of volunteers and actions
  */
 public class VolunteerPanel extends JPanel implements ActionListener {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -376449639733918173L;
 	private static JTable volunteerTable;
 	private static JButton add;
 	private static JButton remove;
@@ -48,6 +54,7 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 	private static JTextField filterText;
 	private static JComboBox<String> filterFields;
 	private static JButton genLetters;
+	private static JButton genLabels;
 	private Color lightBlue;
 	private TableRowSorter<VolunteerTableModel> sorter;
 	private Font arial16;
@@ -100,6 +107,10 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 		genLetters.addActionListener(this);
 		genLetters.setFont(arial16);
 		
+		genLabels = new JButton("Generate Labels");
+		genLabels.addActionListener(this);
+		genLabels.setFont(arial16);
+		
 		fChooser = new JFileChooser();
 		
 		buttonPanel.add(add);
@@ -108,6 +119,7 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 		buttonPanel.add(filterFields);
 		buttonPanel.add(filterText);
 		buttonPanel.add(genLetters);
+		buttonPanel.add(genLabels);
 		
 		//add components to volunteerPanel
 		add(tableScroll);
@@ -152,11 +164,33 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 			if(rows.length == 0)	{
 				JOptionPane.showMessageDialog(this, "Please select at least one volunteer", "Error", JOptionPane.ERROR_MESSAGE);
 			} else	{
+				this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
 				for(int r : rows)	{
 					int newR = volunteerTable.convertRowIndexToModel(r);
 					LetterMaker.genVolunteerNotification(DbManager.getVolunteers().get(newR), path);
 				}
+				this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 				JOptionPane.showMessageDialog(this, "Generating Letters Complete", "Finished", JOptionPane.INFORMATION_MESSAGE);
+			}
+		}
+		else if(e.getSource() == genLabels)	{
+			String path = null;
+			int val = fChooser.showSaveDialog(fChooser);
+			if(val == JFileChooser.APPROVE_OPTION)
+				path = fChooser.getSelectedFile().getPath() + ".docx";
+			int[] rows = volunteerTable.getSelectedRows();
+			if(rows.length == 0)	{
+				JOptionPane.showMessageDialog(this, "Please select at least one volunteer", "Error", JOptionPane.ERROR_MESSAGE);
+			} else	{
+				this.setCursor(new Cursor(Cursor.WAIT_CURSOR));
+				ArrayList<Volunteer> vols = new ArrayList<Volunteer>();
+				for(int r : rows)	{
+					int newR = volunteerTable.convertRowIndexToModel(r);
+					vols.add(DbManager.getVolunteers().get(newR));
+				}//TODO alphabetize
+				LetterMaker.genLabels(vols, path);
+				this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				JOptionPane.showMessageDialog(this, "Generating Labels Complete", "Finished", JOptionPane.INFORMATION_MESSAGE);
 			}
 		}
 	}
@@ -188,6 +222,10 @@ public class VolunteerPanel extends JPanel implements ActionListener {
 	 */
 	private static class AddVolunteerDialog extends JDialog	{
 		
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -8002031765980871025L;
 		private Container content;
 		private JTextField[] fields;
 		private JLabel[] fieldLabels;

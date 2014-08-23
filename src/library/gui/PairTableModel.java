@@ -18,6 +18,10 @@ import library.database.Volunteer;
  */
 public class PairTableModel extends AbstractTableModel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4432086182821416444L;
 	private String[] colNames = {"Student", "Volunteer"};
 	private ArrayList<Pair> pairs;
 	

@@ -21,6 +21,9 @@ import org.apache.poi.xwpf.usermodel.IBodyElement;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
 import org.apache.poi.xwpf.usermodel.XWPFRun;
+import org.apache.poi.xwpf.usermodel.XWPFTable;
+import org.apache.poi.xwpf.usermodel.XWPFTableCell;
+import org.apache.poi.xwpf.usermodel.XWPFTableRow;
 
 /**
  * Interfaces between Word Document Templates and Database names to allow user to print auto generated letters
@@ -33,6 +36,7 @@ public class LetterMaker {
 	private static FileOutputStream fout;
 	private static final String volunteerTemplate = "Volunteer Notification.docx";
 	private static final String studentTemplate = "Student Notification.docx";
+	private static final String labelTemplate = "Label Template.docx";
 	private static XWPFDocument doc;
 	
 	private static String[] volunteerKeys = {"SESSION", "BUDDY", "CONTACT", "GRADE", "SUBJECT", "AVAILABILITY"};
@@ -222,5 +226,98 @@ public class LetterMaker {
 			e.printStackTrace();
 		}
 		closeOutputStream();
+	}
+	
+	/**
+	 * Generates labels for letters given student or volunteer
+	 * @param o student or volunteer
+	 * @param path
+	 */
+	public static void genLabels(ArrayList<?> o, String path)	{
+		Class<?> c = null;
+		if(o.get(0) instanceof Student)	{
+			c = Student.class;
+		} else if(o.get(0) instanceof Volunteer)	{
+			c = Volunteer.class;
+		}
+
+		openInputStream(labelTemplate);
+		
+		XWPFDocument newDoc = null;
+		XWPFDocument temp = null;
+		try {
+			temp = new XWPFDocument(doc.getPackage());
+			newDoc = new XWPFDocument(doc.getPackage());
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+		
+		int labelTables = o.size() / 30 + 1;//figure out how many tables
+		
+		//create tables
+		for(int t = 0; t < labelTables && o.size() > 0; t++)	{
+			if(t != 0) newDoc.createTable();
+			XWPFTable newTable = doc.getTables().get(0);
+			for(XWPFTableRow row : newTable.getRows())	{
+				for(XWPFTableCell cell : row.getTableCells())	{
+					if(o.size() != 0)	{
+						Object person = null;
+						if(cell.getParagraphs().size() > 1)	{
+							person = o.remove(0);
+						}
+						else continue;//if this is an empty cell, go back to beginning of loop
+						for(int i = 0; i < cell.getParagraphs().size(); i++)	{
+							XWPFParagraph p = cell.getParagraphs().get(i);
+							String name = null;
+							String addr = null;
+							if(c == Student.class)	{
+								name = StringUtility.getFullName((Student) person);
+								addr = (String)((Student) person).getAttribute("Address");
+							}
+							else if(c == Volunteer.class)	{
+								name = StringUtility.getFullName((Volunteer) person);
+								addr = (String)((Volunteer) person).getAttribute("Address");
+							}
+							if(p.getText().contains("NAME") || p.getText().contains("ADDRESS"))	{
+								for(XWPFRun run : p.getRuns())	{
+									if(run.getText(0).contains("NAME"))	{
+										run.setText(run.getText(0).replace("NAME", name), 0);
+									}
+									if(run.getText(0).contains("ADDRESS"))	{
+										run.setText(run.getText(0).replace("ADDRESS", addr), 0);
+									}
+								}
+							}
+						}
+					} else	{
+						for(int i = cell.getParagraphs().size() - 1; i > 0; i--)
+							cell.removeParagraph(i);//empty the cell
+					}
+				}
+			}
+			try {
+				doc = new XWPFDocument(temp.getPackage());//set original back
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			newDoc.setTable(t, newTable);
+		}
+		
+		
+		closeInputStream();
+		
+		if(c == Student.class)	{
+			openOutputStream(path);
+		} else if(c == Volunteer.class)	{
+			openOutputStream(path);
+		}
+		
+		try {
+			newDoc.write(fout);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		closeOutputStream();
+		
 	}
 }

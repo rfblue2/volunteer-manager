@@ -1,5 +1,0 @@
-DbManager.setSession(new Date(System.currentTimeMillis()), new Date(System.currentTimeMillis() + 100000000L));
-//DbManager.getSession();
-
-LetterMaker.genStudentNotification(DbManager.getStudents().get(0), "letters");
-

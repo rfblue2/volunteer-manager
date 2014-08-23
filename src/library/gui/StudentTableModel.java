@@ -19,6 +19,10 @@ import library.database.Student;
  */
 public class StudentTableModel extends AbstractTableModel implements TableModelListener {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -2334804479877681805L;
 	//temporary, filler column names; later retrieve from database
 	private ArrayList<String> colNames;
 	private ArrayList<Student> data;

@@ -25,7 +25,7 @@ import library.gui.panels.VolunteerPanel;
  * @author Roland
  *
  */
-public class Manager {
+public class Manager {//TODO make functions that take students or volunteers as arguments not type specific
 	
 	public static final double version = 1.0;
 	
